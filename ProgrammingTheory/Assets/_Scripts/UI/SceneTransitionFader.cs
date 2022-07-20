@@ -41,8 +41,6 @@ public class SceneTransitionFader : MonoBehaviour
 
         if (_progressBar == null)
             _progressBar = GetComponentInChildren<Slider>();
-
-        gameObject.SetActive(false);
     }
 
     protected void Update()

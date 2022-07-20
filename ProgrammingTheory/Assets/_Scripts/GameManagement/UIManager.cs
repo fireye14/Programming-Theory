@@ -15,10 +15,10 @@ namespace Assets._Scripts.GameManagement
         #region Fields
 
         [SerializeField] private GameObject TitleScreenContainer;
+        [SerializeField] private PauseMenu _pauseMenu;
         [SerializeField] private InputField _nameText;
         [SerializeField] private Text _errorText;
         [SerializeField] private SceneTransitionFader _sceneTransitionFader;
-        [SerializeField] private Camera _dummyCamera;
 
         #endregion
 
@@ -61,18 +61,31 @@ namespace Assets._Scripts.GameManagement
 
         #region Overrides
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void AwakeSystemManager()
         {
             if (_sceneTransitionFader == null)
                 _sceneTransitionFader = GetComponentInChildren<SceneTransitionFader>();
 
-            if(_dummyCamera == null)
-                _dummyCamera = GetComponentInChildren<Camera>();
+            if (_sceneTransitionFader != null)
+                _sceneTransitionFader.gameObject.SetActive(false);
+
+            if (_pauseMenu == null)
+                _pauseMenu = GetComponentInChildren<PauseMenu>();
+
+            if(_pauseMenu != null)
+                _pauseMenu.gameObject.SetActive(false);
+
 
             GM.LoadOperationCompleted += GM_LoadOperationCompleted;
             GM.SceneTransitionFadeBegin += GM_SceneTransitionFadeBegin;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnDestroySystemManager()
         {
             if (GM != null)
@@ -105,9 +118,26 @@ namespace Assets._Scripts.GameManagement
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    HandleQuitGame();
+                    QuitGame();
                 }
             }
+            else if (GM.CurrentGameState == GameState.Running)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    // Escape pressed while game is running
+                    PauseGame();
+                }
+            }
+            else if (GM.CurrentGameState == GameState.Paused)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    // Escape pressed while game is paused
+                    ResumeGame();
+                }
+            }
+
         }
 
         /// <summary>
@@ -141,9 +171,45 @@ namespace Assets._Scripts.GameManagement
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void HandleQuitGame()
+        protected virtual void QuitGame()
         {
             GM.QuitGame();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected virtual void PauseGame()
+        {
+            _pauseMenu.gameObject.SetActive(true);
+            GM.PauseGame();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void ResumeGame()
+        {
+            _pauseMenu.gameObject.SetActive(false);
+            GM.ResumeGame();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void RestartGame()
+        {
+            _pauseMenu.gameObject.SetActive(false);
+            GM.RestartGame();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void ReturnToTitleScreen()
+        {
+            _pauseMenu.gameObject.SetActive(false);
+            GM.ReturnToTitleScreen();
         }
 
         /// <summary>
@@ -183,6 +249,7 @@ namespace Assets._Scripts.GameManagement
         {
             _sceneTransitionFader.FadeIn(ao);
         }
+
 
         #endregion
 

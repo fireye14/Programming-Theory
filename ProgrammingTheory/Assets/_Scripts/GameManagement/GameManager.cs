@@ -84,7 +84,7 @@ namespace Assets._Scripts.GameManagement
         /// </summary>
         public void StartGame(string playerName)
         {
-            LoadScene(SceneName.Main, GameState.Running, false);
+            LoadScene(SceneName.Main, GameState.Running, true);
         }
 
         /// <summary>
@@ -97,6 +97,38 @@ namespace Assets._Scripts.GameManagement
 #else
         Application.Quit();
 #endif
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void PauseGame()
+        {
+            ChangeGameState(GameState.Paused);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ResumeGame()
+        {
+            ChangeGameState(GameState.Running);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RestartGame()
+        {
+            LoadScene(SceneName.Main, GameState.Running, true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ReturnToTitleScreen()
+        {
+            LoadScene(SceneName.TitleScreen, GameState.TitleScreen, true);
         }
 
         #endregion

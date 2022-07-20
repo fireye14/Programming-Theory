@@ -284,7 +284,6 @@ namespace Assets._Scripts.GameManagement.BaseTypes
                 var prevState = CurrentGameState;
                 CurrentGameState = newState;
 
-
                 GameStateChanged?.Invoke(this, new GameStateChangedEventArgs(prevState, newState));
                 OnGameStateChanged(prevState, newState);
                 Debug.Log($"Game State changed from {prevState} to {CurrentGameState}.");
