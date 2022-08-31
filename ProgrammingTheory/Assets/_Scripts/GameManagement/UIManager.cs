@@ -1,6 +1,9 @@
 
 using System;
+using System.Runtime.CompilerServices;
+using Assets._Scripts.Characters;
 using Assets._Scripts.GameManagement.BaseTypes;
+using Assets._Scripts.Helpers;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,10 +18,14 @@ namespace Assets._Scripts.GameManagement
         #region Fields
 
         [SerializeField] private GameObject TitleScreenContainer;
+        [SerializeField] private GameObject HUDContainer;
         [SerializeField] private PauseMenu _pauseMenu;
+        [SerializeField] private GameOverMenu _gameOverMenu;
         [SerializeField] private InputField _nameText;
         [SerializeField] private Text _errorText;
         [SerializeField] private SceneTransitionFader _sceneTransitionFader;
+        [SerializeField] private Text _healthText;
+        [SerializeField] private Text _scoreText;
 
         #endregion
 
@@ -56,6 +63,42 @@ namespace Assets._Scripts.GameManagement
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GM_GameStateChanged(object sender, GameStateChangedEventArgs e)
+        {
+            try
+            {
+                OnGameStateChanged(e.PrevState, e.NewState);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GM_ScoreChanged(object sender, ScoreChangedEventArgs e)
+        {
+            try
+            {
+                OnScoreChanged(e.NewScore);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+                throw;
+            }
+        }
+
         #endregion
 
 
@@ -66,21 +109,41 @@ namespace Assets._Scripts.GameManagement
         /// </summary>
         protected override void AwakeSystemManager()
         {
+
+            if(HUDContainer != null)
+                HUDContainer.SetActive(false);
+
             if (_sceneTransitionFader == null)
                 _sceneTransitionFader = GetComponentInChildren<SceneTransitionFader>();
 
             if (_sceneTransitionFader != null)
+            {
+                _sceneTransitionFader.gameObject.SetActive(true);
                 _sceneTransitionFader.gameObject.SetActive(false);
+            }
 
             if (_pauseMenu == null)
                 _pauseMenu = GetComponentInChildren<PauseMenu>();
 
-            if(_pauseMenu != null)
+            if (_pauseMenu != null)
+            {
+                _pauseMenu.gameObject.SetActive(true);
                 _pauseMenu.gameObject.SetActive(false);
+            }
 
+            if (_gameOverMenu == null)
+                _gameOverMenu = GetComponentInChildren<GameOverMenu>();
+
+            if (_gameOverMenu != null)
+            {
+                _gameOverMenu.gameObject.SetActive(true);
+                _gameOverMenu.gameObject.SetActive(false);
+            }
 
             GM.LoadOperationCompleted += GM_LoadOperationCompleted;
-            GM.SceneTransitionFadeBegin += GM_SceneTransitionFadeBegin;
+            //GM.SceneTransitionFadeBegin += GM_SceneTransitionFadeBegin;
+            GM.GameStateChanged += GM_GameStateChanged;
+            GM.ScoreChanged += GM_ScoreChanged;
         }
 
         /// <summary>
@@ -91,7 +154,9 @@ namespace Assets._Scripts.GameManagement
             if (GM != null)
             {
                 GM.LoadOperationCompleted -= GM_LoadOperationCompleted;
-                GM.SceneTransitionFadeBegin -= GM_SceneTransitionFadeBegin;
+                //GM.SceneTransitionFadeBegin -= GM_SceneTransitionFadeBegin;
+                GM.GameStateChanged -= GM_GameStateChanged;
+                GM.ScoreChanged -= GM_ScoreChanged;
             }
         }
 
@@ -99,6 +164,9 @@ namespace Assets._Scripts.GameManagement
 
         #region Methods
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void Start()
         {
             _nameText.Select();
@@ -114,7 +182,7 @@ namespace Assets._Scripts.GameManagement
             {
                 if(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
                 {
-                    HandleStartGame();
+                    StartGame();
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
@@ -143,7 +211,7 @@ namespace Assets._Scripts.GameManagement
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void HandleStartGame()
+        protected virtual void StartGame()
         {
             if (GM.IsLoadingScene)
                 return;
@@ -199,6 +267,7 @@ namespace Assets._Scripts.GameManagement
         /// </summary>
         public virtual void RestartGame()
         {
+            _gameOverMenu.gameObject.SetActive(false);
             _pauseMenu.gameObject.SetActive(false);
             GM.RestartGame();
         }
@@ -208,6 +277,7 @@ namespace Assets._Scripts.GameManagement
         /// </summary>
         public virtual void ReturnToTitleScreen()
         {
+            _gameOverMenu.gameObject.SetActive(false);
             _pauseMenu.gameObject.SetActive(false);
             GM.ReturnToTitleScreen();
         }
@@ -247,11 +317,54 @@ namespace Assets._Scripts.GameManagement
         /// <param name="ao"></param>
         protected void OnSceneTransitionFadeBegin(AsyncOperation ao)
         {
-            _sceneTransitionFader.FadeIn(ao);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="prevState"></param>
+        /// <param name="newState"></param>
+        protected void OnGameStateChanged(IGameState prevState, IGameState newState)
+        {
+            if (newState == GameState.GameOver)
+            {
+                _gameOverMenu.gameObject.SetActive(true);
+                _gameOverMenu.UpdateHighScoreList();
+                _gameOverMenu.UpdateScoreText();
+            }
+
+
+            if (newState == GameState.Running)
+            {
+                HUDContainer.SetActive(true);
+            }
+            else if (prevState == GameState.Running)
+            {
+                HUDContainer.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newScore"></param>
+        protected void OnScoreChanged(int newScore)
+        {
+            _scoreText.text = $"Score: {newScore}";
+        }
+
+        public virtual void UpdateHealth(int value)
+        {
+            _healthText.text = $"Health: {value}";
         }
 
 
         #endregion
+
+
+
+
+        
 
     }
 }

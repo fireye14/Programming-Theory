@@ -10,7 +10,7 @@ namespace Assets._Scripts.GameManagement.BaseTypes
     /// </summary>
     /// <typeparam name="T">SystemManager type</typeparam>
     /// <typeparam name="G">GameManager type</typeparam>
-    public abstract class SystemManagerBase<T, G> : Singleton<T>, ISystemManager
+    public abstract class SystemManagerBase<T, G> : Singleton<T>, ISystemManager<G>
         where T : SystemManagerBase<T, G>
         where G : GameManagerBase<G>
     {
@@ -22,7 +22,7 @@ namespace Assets._Scripts.GameManagement.BaseTypes
         /// </summary>
         private G _gm;
 
-        protected G GM
+        public G GM
         {
             get
             {

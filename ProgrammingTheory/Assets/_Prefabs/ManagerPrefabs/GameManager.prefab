@@ -45,4 +45,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SystemManagerPrefabs:
   - {fileID: 4024930602998407411, guid: 9674710761464044eb9e7132b3330498, type: 3}
-  - {fileID: 8520393617039526984, guid: 530128a8f12bc934394edce63cf1761f, type: 3}

@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Assets._Scripts.GameManagement;
+using Assets._Scripts.GameManagement.BaseTypes;
 using Assets._Scripts.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
+using static Assets._Scripts.Helpers.EventArgs;
 
 public class SceneTransitionFader : MonoBehaviour
 {
@@ -14,8 +16,6 @@ public class SceneTransitionFader : MonoBehaviour
     [SerializeField] private float _fadeSpeed;
     [SerializeField] private Slider _progressBar;
     [SerializeField] private Text _loadingText;
-
-    private float _target;
 
     protected AsyncOperation LoadOperation;
     protected bool fadeIn;
@@ -29,6 +29,33 @@ public class SceneTransitionFader : MonoBehaviour
 
     #endregion
 
+    #region Events
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void GM_SceneTransitionFadeBegin(object sender, AsyncOperationEventArgs e)
+    {
+        try
+        {
+            FadeIn(e.AsyncOperation);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.Message);
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    /// <summary>
+    /// 
+    /// </summary>
     protected void Awake()
     {
         if (_canvasGroup == null)
@@ -41,8 +68,27 @@ public class SceneTransitionFader : MonoBehaviour
 
         if (_progressBar == null)
             _progressBar = GetComponentInChildren<Slider>();
+
+        SM.GM.SceneTransitionFadeBegin += GM_SceneTransitionFadeBegin;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    protected void OnDestroy()
+    {
+        if (SM != null)
+        {
+            if (SM.GM != null)
+            {
+                SM.GM.SceneTransitionFadeBegin -= GM_SceneTransitionFadeBegin;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     protected void Update()
     {
         if (fadeIn)
@@ -91,4 +137,6 @@ public class SceneTransitionFader : MonoBehaviour
     {
         fadeOut = true;
     }
+
+    #endregion
 }

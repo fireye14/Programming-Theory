@@ -34,6 +34,8 @@ namespace Assets._Scripts.Helpers
 
         public delegate void GameStateChangedEventHandler(object sender, EventArgs.GameStateChangedEventArgs e);
 
+        public delegate void ScoreChangedEventHandler(object sender, EventArgs.ScoreChangedEventArgs e);
+
         public delegate void LoadOperationEventHandler(object sender, EventArgs.LoadOperationEventArgs e);
 
         public delegate void AsyncOperationEventHandler(object sender, EventArgs.AsyncOperationEventArgs e);
@@ -54,6 +56,16 @@ namespace Assets._Scripts.Helpers
 
             public IGameState PrevState { get; }
             public IGameState NewState { get; }
+        }
+
+        public class ScoreChangedEventArgs : System.EventArgs
+        {
+            public ScoreChangedEventArgs(int newScore)
+            {
+                NewScore = newScore;
+            }
+
+            public int NewScore { get; }
         }
 
         public class LoadOperationEventArgs : System.EventArgs

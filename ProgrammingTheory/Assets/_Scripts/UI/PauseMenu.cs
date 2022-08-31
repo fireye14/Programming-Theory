@@ -71,17 +71,15 @@ public class PauseMenu : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected void OnDestroy()
     {
         if (GM != null)
         {
             GM.GameStateChanged -= GM_GameStateChanged;
         }
-    }
-
-    // Update is called once per frame
-    void Update() 
-    {
     }
 
     protected void OnGameStateChanged(IGameState prevState, IGameState newState)
@@ -103,6 +101,7 @@ public class PauseMenu : MonoBehaviour
     {
         Time.timeScale = 1;
         UI.ResumeGame();
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -112,6 +111,7 @@ public class PauseMenu : MonoBehaviour
     {
         Time.timeScale = 1;
         UI.RestartGame();
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -121,6 +121,7 @@ public class PauseMenu : MonoBehaviour
     {
         Time.timeScale = 1;
         UI.ReturnToTitleScreen();
+        gameObject.SetActive(false);
     }
 
     #endregion

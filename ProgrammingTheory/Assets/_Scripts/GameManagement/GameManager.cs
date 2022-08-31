@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEditor.SearchService;
 using UnityEngine;
 using static Assets._Scripts.Helpers.Enums;
+using static Assets._Scripts.Helpers.EventArgs;
+using static Assets._Scripts.Helpers.Events;
 
 namespace Assets._Scripts.GameManagement
 {
@@ -40,25 +42,44 @@ namespace Assets._Scripts.GameManagement
             }
         }
 
+        /// <summary>
+        /// </summary>
+        public string PlayerName { get; protected set; }
 
+        /// <summary>
+        /// </summary>
+        public int CurrentScore { get; protected set; }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Invoked when score changed
+        /// </summary>
+        public event ScoreChangedEventHandler ScoreChanged;
 
         #endregion
 
         #region Overrides
 
         /// <summary>
-        /// 
         /// </summary>
         protected override void AwakeGameManager()
         {
 #if UNITY_EDITOR
             // Default game state is set from the dropdown list in GMInitializer, only used in Editor
             if (DefaultGameState != null)
-                CurrentGameState = DefaultGameState;
+            {
+                ChangeGameState(DefaultGameState);
+            }
 #endif
 
             if(CurrentGameState == GameStateBase.Default && CurrentSceneName == nameof(SceneName.Boot))
                 LoadScene(SceneName.TitleScreen, GameState.TitleScreen);
+
+            // Load save data
+            DataManager.LoadData();
         }
 
         protected override void OnDestroyGameManager()
@@ -84,6 +105,7 @@ namespace Assets._Scripts.GameManagement
         /// </summary>
         public void StartGame(string playerName)
         {
+            PlayerName = playerName;
             LoadScene(SceneName.Main, GameState.Running, true);
         }
 
@@ -129,6 +151,36 @@ namespace Assets._Scripts.GameManagement
         public void ReturnToTitleScreen()
         {
             LoadScene(SceneName.TitleScreen, GameState.TitleScreen, true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void GameOver()
+        {
+            DataManager.AddHighScore(PlayerName, CurrentScore);
+            DataManager.SaveData();
+            ChangeGameState(GameState.GameOver);
+            ResetScore();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="score">Score to add</param>
+        public void AddScore(int score)
+        {
+            CurrentScore += score;
+            ScoreChanged?.Invoke(this, new ScoreChangedEventArgs(CurrentScore));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ResetScore()
+        {
+            CurrentScore = 0;
+            ScoreChanged?.Invoke(this, new ScoreChangedEventArgs(CurrentScore));
         }
 
         #endregion

@@ -12,5 +12,6 @@ namespace Assets._Scripts.GameManagement
         public static readonly GameState TitleScreen = new GameState(nameof(TitleScreen));
         public static readonly GameState Running = new GameState(nameof(Running));
         public static readonly GameState Paused = new GameState(nameof(Paused));
+        public static readonly GameState GameOver = new GameState(nameof(GameOver));
     }
 }

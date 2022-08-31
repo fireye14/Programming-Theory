@@ -15,16 +15,16 @@ namespace Assets._Scripts.Helpers
         /// If this is set to true, Dont Destroy On Load; true by default.
         /// This lets an individual class decide if the object persists through the entire game or only the current scene.
         /// </summary>
-        public bool IsPersisted { get; protected set; } = true;
+        public virtual bool IsPersisted { get; protected set; } = true;
 
         /// <summary>
         /// </summary>
         protected virtual void Awake()
         {
-            if (IsInitialized)
+            if (IsInitialized && IsPersisted)
             {
                 Destroy(gameObject);
-                throw new Exceptions.DuplicateSingletonException("[" + typeof(T).Name + "] Attempt to instantiate a second instance of Singleton class.");
+                throw new Exceptions.DuplicateSingletonException($"[{typeof(T).Name}] Attempt to instantiate a second instance of Singleton class.");
             }
 
             Instance = (T)this;

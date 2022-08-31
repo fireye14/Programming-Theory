@@ -42,7 +42,7 @@ namespace Assets._Scripts.GameManagement.BaseTypes
         /// <summary>
         /// SystemManger objects that are managed by this GameManager.
         /// </summary>
-        protected HashSet<ISystemManager> SystemManagers { get; set; }
+        protected HashSet<ISystemManager<G>> SystemManagers { get; set; }
 
         /// <summary>
         /// False when all loads are done
@@ -74,7 +74,7 @@ namespace Assets._Scripts.GameManagement.BaseTypes
         }
 
         /// <summary>
-        /// 
+        /// Audio listener component of the main camera
         /// </summary>
         protected AudioListener CurrentAudioListener
         {
@@ -155,13 +155,12 @@ namespace Assets._Scripts.GameManagement.BaseTypes
                 // Initialized successfully. 
                 // Perform initializations then call the "real" Awake method defined by the derived class.
 
-                SystemManagers = new HashSet<ISystemManager>();
+                SystemManagers = new HashSet<ISystemManager<G>>();
                 LoadOperations = new Dictionary<AsyncOperation, LoadOperationParams>();
 
                 InstantiateSystemManagerPrefabs();
 
                 AwakeGameManager();
-
             }
             catch (Exceptions.DuplicateSingletonException e)
             {
@@ -192,16 +191,16 @@ namespace Assets._Scripts.GameManagement.BaseTypes
         {
             try
             {
-                base.OnDestroy();
-
                 foreach (var sm in SystemManagers)
                 {
                     var obj = FindObjectOfType(sm.GetType());
-                    if (obj is ISystemManager && obj is MonoBehaviour m)
+                    if (obj is ISystemManager<G> && obj is MonoBehaviour m)
                         Destroy(m.gameObject);
                 }
 
                 SystemManagers.Clear();
+
+                base.OnDestroy();
             }
             catch (Exceptions.DuplicateSingletonException e)
             {
@@ -221,7 +220,7 @@ namespace Assets._Scripts.GameManagement.BaseTypes
             foreach (var prefab in SystemManagerPrefabs)
             {
                 // Do not instantiate unless the game object has a SystemManager component
-                var sm = prefab.GetComponent<ISystemManager>();
+                var sm = prefab.GetComponent<ISystemManager<G>>();
                 if (sm == null)
                 {
                     Debug.LogWarning($"[{typeof(G).Name}] Attempt to instantiate a GameObject without a SystemManager component. " +
@@ -237,14 +236,18 @@ namespace Assets._Scripts.GameManagement.BaseTypes
 
         /// <summary>
         /// </summary>
-        /// <param name="t">SystemManager type to check for</param>
+        /// <param name="sm">SystemManager type to check for</param>
         /// <returns>true if SystemManager is being managed by this GameManager</returns>
-        public bool SystemManagerExists(ISystemManager sm)
+        public bool SystemManagerExists(ISystemManager<G> sm)
         {
             return SystemManagers.Contains(sm);
         }
 
-        internal void AddSystemManager(ISystemManager sm)
+        /// <summary>
+        /// Add system manager type
+        /// </summary>
+        /// <param name="sm">SystemManager type to add</param>
+        internal void AddSystemManager(ISystemManager<G> sm)
         {
             if (SystemManagerExists(sm))
                 return;
@@ -253,7 +256,11 @@ namespace Assets._Scripts.GameManagement.BaseTypes
             OnSystemManagerAdded(sm);
         }
 
-        internal void RemoveSystemManager(ISystemManager sm)
+        /// <summary>
+        /// Remove system manager type
+        /// </summary>
+        /// <param name="sm">SystemManager type to remove</param>
+        internal void RemoveSystemManager(ISystemManager<G> sm)
         {
             if (!SystemManagerExists(sm))
                 return;
@@ -262,11 +269,17 @@ namespace Assets._Scripts.GameManagement.BaseTypes
             OnSystemManagerRemoved(sm);
         }
 
-        protected virtual void OnSystemManagerAdded(ISystemManager sm)
+        /// <summary>
+        /// </summary>
+        /// <param name="sm"></param>
+        protected virtual void OnSystemManagerAdded(ISystemManager<G> sm)
         {
         }
 
-        protected virtual void OnSystemManagerRemoved(ISystemManager sm)
+        /// <summary>
+        /// </summary>
+        /// <param name="sm"></param>
+        protected virtual void OnSystemManagerRemoved(ISystemManager<G> sm)
         {
         }
 
@@ -397,7 +410,6 @@ namespace Assets._Scripts.GameManagement.BaseTypes
         /// Remove the load operation from the list and Invoke the LoadOperationCompleted event
         /// </summary>
         /// <param name="ao">The async operation that completed</param>
-        /// <param name="opType">load operation type</param>
         private void AOCompleted(AsyncOperation ao)
         {
             try
@@ -410,6 +422,8 @@ namespace Assets._Scripts.GameManagement.BaseTypes
 
                 LoadOperations.TryGetValue(ao, out var p);
                 LoadOperations.Remove(ao);
+                if (p == null)
+                    return;
 
                 if (p.OpType == LoadOperationType.Load)
                 {
