@@ -1,10 +1,6 @@
 
 using System;
-using System.Runtime.CompilerServices;
-using Assets._Scripts.Characters;
 using Assets._Scripts.GameManagement.BaseTypes;
-using Assets._Scripts.Helpers;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 using static Assets._Scripts.Helpers.Enums;

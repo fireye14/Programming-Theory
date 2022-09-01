@@ -1,9 +1,7 @@
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Assets._Scripts.GameManagement.BaseTypes;
 using UnityEditor;
-using UnityEditor.SearchService;
 using UnityEngine;
 using static Assets._Scripts.Helpers.Enums;
 using static Assets._Scripts.Helpers.EventArgs;
@@ -117,7 +115,7 @@ namespace Assets._Scripts.GameManagement
 #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
 #else
-        Application.Quit();
+            Application.Quit();
 #endif
         }
 

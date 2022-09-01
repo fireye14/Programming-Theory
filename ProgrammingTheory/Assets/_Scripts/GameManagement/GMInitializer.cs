@@ -3,8 +3,8 @@ using System.Linq;
 using System.Reflection;
 using Assets._Scripts.GameManagement.BaseTypes;
 using UnityEditor;
-using UnityEngine;
 #endif
+using UnityEngine;
 
 namespace Assets._Scripts.GameManagement
 {

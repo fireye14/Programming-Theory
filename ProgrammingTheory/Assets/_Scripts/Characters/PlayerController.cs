@@ -122,6 +122,7 @@ namespace Assets._Scripts.Characters
             if (dir.magnitude >= 0.1f)
             {
                 _rigidBody.MovePosition(_rigidBody.position + _speed * Time.deltaTime * dir);
+                _rigidBody.velocity = Vector3.zero;     // set velocity to zero to prevent sliding
             }
 
             if (Input.GetButtonDown("Fire1") || Input.GetButtonDown("Jump"))
@@ -143,11 +144,11 @@ namespace Assets._Scripts.Characters
                 if (contact.otherCollider.CompareTag(Tags.Enemy))
                 {
                     HitByEnemy();
-                    _rigidBody.velocity = Vector3.zero;     // set velocity to zero to prevent sliding
                     break;
                 }
 
             }
+            _rigidBody.velocity = Vector3.zero;     // set velocity to zero to prevent sliding
         }
 
         
