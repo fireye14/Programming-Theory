@@ -214,6 +214,7 @@ namespace Assets._Scripts.GameManagement
 
             if (ValidateName())
             {
+                _errorText.gameObject.SetActive(false);
                 GM.StartGame(_nameText.text.Trim());
             }
             else
